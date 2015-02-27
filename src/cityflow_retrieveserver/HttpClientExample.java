@@ -4,14 +4,17 @@
  * and open the template in the editor.
  */
 package cityflow_retrieveserver;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Date;
  
 import javax.net.ssl.HttpsURLConnection;
- 
+import org.json.*;
+
 public class HttpClientExample {
  
 	private final String USER_AGENT = "Mozilla/5.0";
@@ -20,21 +23,45 @@ public class HttpClientExample {
  
 		HttpClientExample http = new HttpClientExample();
  
-		System.out.println("Testing 1 - Send Http GET request");
-		http.sendGet();
- 
-		System.out.println("\nTesting 2 - Send Http POST request");
-		http.sendPost();
+		System.out.println("Testing 1 - Search Instagram by Location");
+                Float lat = (float) 41.389639;
+                Float lng = (float) 2.176743;
+                Float rad = (float) 1000;
+                long min_timestamp = 300;
+		String response; 
+                response = http.searchInstagramByLocation(lat,lng,rad,min_timestamp);
+                //JSONObject obj = new JSONObject(response);
+//                String pageName = obj.getJSONObject("pageInfo").getString("pageName");
+//                JSONArray arr = obj.getJSONArray("posts");
+//                for (int i = 0; i < arr.length(); i++)
+//                {
+//                    String post_id = arr.getJSONObject(i).getString("post_id");
+//                    ......
+//                }
+                System.out.println("\n"+response);
+                
+		//System.out.println("\nTesting 2 - Send Http POST request");
+		//http.sendPost();
  
 	}
  
 	// HTTP GET request
-	private void sendGet() throws Exception {
+	private String searchInstagramByLocation(Float lat,Float lng, Float rad, long min_timestamp) throws Exception {
  
-		String url = "http://www.google.com/search?q=mkyong";
+		          
+                String url = "https://api.instagram.com/v1/media/search";
+                Date now = new Date();
+                Long timestamp;
+                timestamp = now.getTime()/1000-min_timestamp;
+                url = url.concat("?lat=").concat(lat.toString())
+                        .concat("&lng=").concat(lng.toString())
+                        .concat("&distance=").concat(rad.toString())
+                        .concat("&min_timestamp=").concat(timestamp.toString())
+                        .concat("&client_id=f270041f78bc441f9998a741db100261"); //Instagram developer ID
+                
  
 		URL obj = new URL(url);
-		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
  
 		// optional default is GET
 		con.setRequestMethod("GET");
@@ -42,9 +69,10 @@ public class HttpClientExample {
 		//add request header
 		con.setRequestProperty("User-Agent", USER_AGENT);
  
-		int responseCode = con.getResponseCode();
-		System.out.println("\nSending 'GET' request to URL : " + url);
-		System.out.println("Response Code : " + responseCode);
+		//int responseCode = con.getResponseCode();
+                
+		//System.out.println("\nSending 'GET' request to URL : " + url);
+		//System.out.println("Response Code : " + responseCode);
  
 		BufferedReader in = new BufferedReader(
 		        new InputStreamReader(con.getInputStream()));
@@ -56,8 +84,8 @@ public class HttpClientExample {
 		}
 		in.close();
  
-		//print result
-		System.out.println(response.toString());
+		//return result
+		return response.toString();
  
 	}
  
