@@ -14,14 +14,14 @@ import java.util.Date;
 public class InstagramPost {
 
     
-    Integer id, likes, idneighbourhood;
+    Integer likes, idneighbourhood;
     String type, caption, tags, im_link;
     Float lat,lng;
     Date date;
     
-    public InstagramPost(Integer id, String type, Date date, String caption, String tags,
+    public InstagramPost(String type, Date date, String caption, String tags,
             String im_link, Float lat, Float lng, Integer likes, Integer idneighbourhood){
-        this.id = id;
+        
         this.caption=caption;
         this.date=date;
         this.idneighbourhood=idneighbourhood;
@@ -33,14 +33,7 @@ public class InstagramPost {
         this.likes=likes;
     }
     
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
+    
     public Integer getLikes() {
         return likes;
     }

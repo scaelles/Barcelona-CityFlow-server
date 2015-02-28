@@ -10,6 +10,7 @@ import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
  
 import javax.net.ssl.HttpsURLConnection;
@@ -21,7 +22,7 @@ public class HttpClient {
  
 	
  
-	// HTTP GET request
+	
 	public String searchInstagramByLocation(Float lat,Float lng, Float rad, long min_timestamp) throws Exception {
  
 		          
