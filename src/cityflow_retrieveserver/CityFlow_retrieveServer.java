@@ -5,8 +5,16 @@
  */
 package cityflow_retrieveserver;
 
+import dbConnect.Districts;
+import dbConnect.Neighbourhoods;
+import dbConnect.Posts;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
 import org.json.*;
 import java.util.Iterator;
 import java.awt.Polygon;
@@ -32,8 +40,28 @@ public class CityFlow_retrieveServer {
                 Float rad = (float) 1000;
                 long min_timestamp = 300;
                 
-		ArrayList<InstagramPost> postList = searchInstagramPostsByLocation(lat,lng,rad,min_timestamp);
+                EntityManager entityManager = Persistence.createEntityManagerFactory("CityFlow_retrieveServerPU").createEntityManager();
+                entityManager.getTransaction().begin();
                 
+                Query query = entityManager.createNamedQuery("Districts.findAll");
+                List<Districts> districtsList = query.getResultList();
+                query = entityManager.createNamedQuery("Neighbourhoods.findAll");
+                List<Neighbourhoods> neighbourhoodsList = query.getResultList();
+                
+                ArrayList<Posts> postList = searchInstagramPostsByLocation(lat,lng,rad,min_timestamp);
+                //for (Posts p : postList) {
+                    //entityManager.persist(p);
+                    //entityManager.flush();
+                    //entityManager.refresh(p);
+                //}
+
+                entityManager.persist(postList.get(1));
+                entityManager.getTransaction().commit();
+                entityManager.close();
+
+                
+                System.out.println("#Districts: " + districtsList.size());
+                System.out.println("#Neighbourhoods: " + neighbourhoodsList.size());
                 
                 System.out.println("\n");
                 
@@ -42,7 +70,7 @@ public class CityFlow_retrieveServer {
  
     }
     
-    private static ArrayList<InstagramPost> searchInstagramPostsByLocation(Float lat,Float lng, Float rad, long min_timestamp) throws Exception  {
+    private static ArrayList<Posts> searchInstagramPostsByLocation(Float lat,Float lng, Float rad, long min_timestamp) throws Exception  {
 
         String response; 
         HttpClient http = new HttpClient();
@@ -53,23 +81,27 @@ public class CityFlow_retrieveServer {
         JSONArray arr = obj.getJSONArray("data");
 
 
-        ArrayList<InstagramPost> postList = new ArrayList<>();
+        ArrayList<Posts> postList = new ArrayList<>();
 
         for (int i = 0; i < arr.length(); i++)
         {
-            JSONObject post = arr.getJSONObject(i);
+            JSONObject jpost = arr.getJSONObject(i);
 
-            String type = post.getString("type");
-
+            String type = jpost.getString("type");
+               
+            Date now = new Date();
+            Posts post = new Posts(0,type,now,0);
+                    
             String caption;
-            if(post.isNull("caption")){
+            if(jpost.isNull("caption")){
                 caption = "";
             }else{
-                caption = post.getJSONObject("caption").getString("text");
+                caption = jpost.getJSONObject("caption").getString("text");
             }
-
+            post.setCaption(caption);
+            
             String tags = "";
-            JSONArray tagArr = post.getJSONArray("tags");
+            JSONArray tagArr = jpost.getJSONArray("tags");
             for (int j = 0; j < tagArr.length(); j++){
                 if(j==0){
                      tags=tagArr.getString(j);
@@ -77,20 +109,26 @@ public class CityFlow_retrieveServer {
                     tags=tags.concat(","+tagArr.getString(j));
                 }
             }
-
-            String im_link = post.getJSONObject("images").getJSONObject("standard_resolution").getString("url");
-
-            Float latitude = (float) post.getJSONObject("location").getDouble("latitude");
-            Float longitude = (float) post.getJSONObject("location").getDouble("longitude");
-
-            Integer likes = post.getJSONObject("likes").getInt("count");
-
-            Date now = new Date();
+            post.setTags(tags);
+            
+            String im_link = jpost.getJSONObject("images").getJSONObject("standard_resolution").getString("url");
+            post.setImLink(im_link);
+            
+            Float latitude = (float) jpost.getJSONObject("location").getDouble("latitude");
+            Float longitude = (float) jpost.getJSONObject("location").getDouble("longitude");
+            post.setLat(latitude);
+            post.setLong1(longitude);
+            
+            Integer likes = jpost.getJSONObject("likes").getInt("count");
+            post.setLikes(likes);
+            
 
             // CALCULAR IDNEIGHBOURHOOD
 
+            //post.setIdNeighb(idNeighb);
 
-            postList.add( new InstagramPost(type,now,caption,tags,im_link,latitude,longitude,likes,0));               
+            postList.add(post);
+            
         }
         return postList;
     }
