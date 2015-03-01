@@ -154,10 +154,13 @@ public class CityFlow_retrieveServer {
     }
     
     private static ArrayList<double[]> findCenterCircles(double[] x_bounds, double[] y_bounds, double r){
+		//Example polygon that can be used for Barcelona that surrounds all the neighbourhoods
+		    //double[] y = {41.404301,41.324095,41.417569,41.471839};
+			//double[] x = {2.070192,2.158517,2.236232,2.184016};
         int prec = 5;
         
-        double ry=r*0.005/557;
-        double rx=r*0.01/834;
+        double rx=r*0.005/557;
+        double ry=r*0.01/834;
         
         double y,ymin,x,xmin,xmax,ymax;
         ArrayList<double[]> centers = new ArrayList<>();
@@ -194,7 +197,7 @@ public class CityFlow_retrieveServer {
         PolygonFloat pol = new PolygonFloat(x_bounds,y_bounds,x_bounds.length,prec);
         while(itr.hasNext()){
             center = (double[])itr.next();
-            if (pol.contains(center[0], center[1])){
+            if (pol.contains(center[1], center[0])){
                 final_centers.add(center);
             }
         }

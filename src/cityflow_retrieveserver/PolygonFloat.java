@@ -29,7 +29,7 @@ public class PolygonFloat extends Polygon{
 
         for(int i=0;i<npoints;i++){
             x_temp[i] = (int)Math.round(x[i]*Math.pow(10,precision));
-            y_temp[i] = (int)Math.round(x[i]*Math.pow(10,precision));
+            y_temp[i] = (int)Math.round(y[i]*Math.pow(10,precision));
         }
         this.xpoints = Arrays.copyOf(x_temp, npoints);
         this.ypoints = Arrays.copyOf(y_temp, npoints);
