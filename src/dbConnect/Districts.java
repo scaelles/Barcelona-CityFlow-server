@@ -5,6 +5,7 @@
  */
 package dbConnect;
 
+import cityflow_retrieveserver.PolygonFloat;
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -15,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -46,6 +48,8 @@ public class Districts implements Serializable {
     @Basic(optional = false)
     @Column(name = "center")
     private String center;
+    @Transient
+    private PolygonFloat poly;
 
     public Districts() {
     }
@@ -93,6 +97,14 @@ public class Districts implements Serializable {
         this.center = center;
     }
 
+    public PolygonFloat getPoly() {
+        return poly;
+    }
+
+    public void setPoly(PolygonFloat poly) {
+        this.poly = poly;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -116,6 +128,25 @@ public class Districts implements Serializable {
     @Override
     public String toString() {
         return "dbConnect.Districts[ idDistrict=" + idDistrict + " ]";
+    }
+    
+    
+    public void doPoly() {
+        int prec = 5;
+        
+        String[] loc = this.bounds.split("[|]");
+        double[] x = new double[loc.length];
+        double[] y = new double[loc.length];
+        
+        int i =0;
+        String[] location;
+        for (String loc1 : loc) {
+            location = loc1.split(",");
+            x[i]=Double.parseDouble(location[0]);
+            y[i]=Double.parseDouble(location[1]);
+            i++;
+        }
+        setPoly(new PolygonFloat(x,y,x.length,prec));
     }
     
 }

@@ -37,7 +37,8 @@ public class PolygonFloat extends Polygon{
         this.npoints = npoints;
     }
 
+    @Override
     public boolean contains(double x, double y){
-        return contains(x*Math.pow(10,precision),y*Math.pow(10,precision));
+        return super.contains(x*Math.pow(10,precision),y*Math.pow(10,precision));
     }   
 }

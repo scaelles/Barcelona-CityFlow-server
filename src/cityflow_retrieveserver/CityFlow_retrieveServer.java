@@ -35,45 +35,59 @@ public class CityFlow_retrieveServer {
  
 		System.out.println("Testing 1 - Search Instagram by Location");
                 
-                Float lat = (float) 41.389639;
-                Float lng = (float) 2.176743;
-                Float rad = (float) 1000;
+                //Float lat = (float) 41.389639;
+                //Float lng = (float) 2.176743;
+                Float rad = (float) 500;
                 long min_timestamp = 300;
                 
                 EntityManager entityManager = Persistence.createEntityManagerFactory("CityFlow_retrieveServerPU").createEntityManager();
-                entityManager.getTransaction().begin();
                 
+                //Retrieve districts and neighbourhoods list from DB
                 Query query = entityManager.createNamedQuery("Districts.findAll");
                 List<Districts> districtsList = query.getResultList();
+                for(Districts dist : districtsList){
+                    dist.doPoly();
+                }
                 query = entityManager.createNamedQuery("Neighbourhoods.findAll");
                 List<Neighbourhoods> neighbourhoodsList = query.getResultList();
                 
+                entityManager.close();
+                
+                // Polygon bounds defining city limits
                 double[] boundslat = {41.404301, 41.324095, 41.417569, 41.471839};
                 double[] boundslng = {2.070192, 2.158517, 2.236232, 2.184016};
                 
+                //Find centers of the circles to search for insta posts
+                ArrayList<double[]> centers = new ArrayList<>();
+                centers = findCenterCircles(boundslng,boundslat,rad);
                 
-                //ArrayList<double[]> centers = findCenterCircles(boundslng,boundslat,4,500);
-                
-                ArrayList<Posts> postList = searchInstagramPostsByLocation(lat,lng,rad,min_timestamp);
-                for (Posts p : postList) {
-                    entityManager.persist(p);
-                    //entityManager.flush();
-                    //entityManager.refresh(p);
-                }
-                Posts post1 = postList.get(1);
-                entityManager.persist(post1);
-                entityManager.getTransaction().commit();
-                entityManager.close();
+                //Loop, search for posts every "min_timestamp" minutes
+                Integer i = 0;
+                while(true){
+                    i++;
+                    
+                    entityManager = Persistence.createEntityManagerFactory("CityFlow_retrieveServerPU").createEntityManager();
+                    entityManager.getTransaction().begin();
 
+                    //Find all posts, once in each circle, repetitions are possible
+                    ArrayList<Posts> postList = new ArrayList<>();
+                    for (double[] center : centers){
+                         postList.addAll(searchInstagramPostsByLocation((float)center[0],(float)center[1],rad,min_timestamp));
+                    }
                 
-                System.out.println("#Districts: " + districtsList.size());
-                System.out.println("#Neighbourhoods: " + neighbourhoodsList.size());
+                    //Post list to DB
+                    for (Posts p : postList) {
+                        entityManager.persist(p);
+                        //entityManager.flush();
+                        //entityManager.refresh(p);
+                    }
+                    entityManager.getTransaction().commit();
+                    
+
+                    Thread.sleep(min_timestamp*1000);             
+                    System.out.println("\n"+i.toString());
+                }
                 
-                System.out.println("\n");
-                
-		//System.out.println("\nTesting 2 - Send Http POST request");
-		//http.sendPost();
- 
     }
     
     private static ArrayList<Posts> searchInstagramPostsByLocation(Float lat,Float lng, Float rad, long min_timestamp) throws Exception  {
@@ -139,8 +153,11 @@ public class CityFlow_retrieveServer {
         return postList;
     }
     
-    private static ArrayList<double[]> findCenterCircles(double[] x_bounds, double[] y_bounds, int npoints, double r){
+    private static ArrayList<double[]> findCenterCircles(double[] x_bounds, double[] y_bounds, double r){
         int prec = 5;
+        
+        double ry=r*0.005/557;
+        double rx=r*0.01/834;
         
         double y,ymin,x,xmin,xmax,ymax;
         ArrayList<double[]> centers = new ArrayList<>();
@@ -155,16 +172,16 @@ public class CityFlow_retrieveServer {
         while(y<ymax){
             x = xmin;
             j = 0;
-            y = y+2*i*r;
+            y = y+2*i*ry;
             if(i%2 == 0){
                 while(x<xmax){
-                    x = x+2*j*r;
+                    x = x+2*j*rx;
                     centers.add(new double[]{x,y});
                     j++;
                 }
             }else{
                 while(x<xmax){
-                    x = x+2*j*r+r;
+                    x = x+2*j*rx+rx;
                     centers.add(new double[]{x,y});
                     j++;
                 }
@@ -176,7 +193,7 @@ public class CityFlow_retrieveServer {
         Iterator itr = centers.iterator();
         ArrayList<double[]> final_centers = new ArrayList<double[]>();
         double[] center = new double[2];
-        PolygonFloat pol = new PolygonFloat(x_bounds,y_bounds,npoints,prec);
+        PolygonFloat pol = new PolygonFloat(x_bounds,y_bounds,x_bounds.length,prec);
         while(itr.hasNext()){
             center = (double[])itr.next();
             if (pol.contains(center[0], center[1])){
