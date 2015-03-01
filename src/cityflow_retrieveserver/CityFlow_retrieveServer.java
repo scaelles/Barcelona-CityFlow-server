@@ -168,24 +168,22 @@ public class CityFlow_retrieveServer {
         ymax = max(x_bounds);
         xmax = max(y_bounds);
         y=ymin;
-        int i = 0, j = 0;
+        int i = 0;
         while(y<ymax){
-            x = xmin;
-            j = 0;
-            y = y+2*i*ry;
+            x = xmin;           
             if(i%2 == 0){
                 while(x<xmax){
-                    x = x+2*j*rx;
                     centers.add(new double[]{x,y});
-                    j++;
+					x = x+2*rx;
                 }
             }else{
+				x = x+rx;
                 while(x<xmax){
-                    x = x+2*j*rx+rx;
                     centers.add(new double[]{x,y});
-                    j++;
+					x = x+2*rx;
                 }
             } 
+			y = y+2*ry;
             i++;
         }
         // We remove all the centers that are not inside the polygon
