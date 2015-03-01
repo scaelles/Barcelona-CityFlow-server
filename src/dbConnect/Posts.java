@@ -62,7 +62,7 @@ public class Posts implements Serializable {
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "lat")
     private Float lat;
-    @Column(name = "long")
+    @Column(name = "lng")
     private Float long1;
     @Column(name = "likes")
     private Integer likes;

@@ -48,14 +48,20 @@ public class CityFlow_retrieveServer {
                 query = entityManager.createNamedQuery("Neighbourhoods.findAll");
                 List<Neighbourhoods> neighbourhoodsList = query.getResultList();
                 
+                double[] boundslat = {41.404301, 41.324095, 41.417569, 41.471839};
+                double[] boundslng = {2.070192, 2.158517, 2.236232, 2.184016};
+                
+                
+                //ArrayList<double[]> centers = findCenterCircles(boundslng,boundslat,4,500);
+                
                 ArrayList<Posts> postList = searchInstagramPostsByLocation(lat,lng,rad,min_timestamp);
-                //for (Posts p : postList) {
-                    //entityManager.persist(p);
+                for (Posts p : postList) {
+                    entityManager.persist(p);
                     //entityManager.flush();
                     //entityManager.refresh(p);
-                //}
-
-                entityManager.persist(postList.get(1));
+                }
+                Posts post1 = postList.get(1);
+                entityManager.persist(post1);
                 entityManager.getTransaction().commit();
                 entityManager.close();
 
@@ -133,11 +139,11 @@ public class CityFlow_retrieveServer {
         return postList;
     }
     
-    public ArrayList<double[]> findCenterCicles(double[] x_bounds, double[] y_bounds, int npoints, double r){
+    private static ArrayList<double[]> findCenterCircles(double[] x_bounds, double[] y_bounds, int npoints, double r){
         int prec = 5;
         
         double y,ymin,x,xmin,xmax,ymax;
-        ArrayList<double[]> centers = new ArrayList<double[]>();
+        ArrayList<double[]> centers = new ArrayList<>();
         
         //Create the centers of the circles, the bounds used is the square that surrounds the given polygon
         ymin = min(x_bounds);
