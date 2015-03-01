@@ -8,10 +8,12 @@ package cityflow_retrieveserver;
 import java.util.ArrayList;
 import java.util.Date;
 import org.json.*;
+import java.util.Iterator;
+import java.awt.Polygon;
 
 /**
  *
- * @author Miquel
+ * @author Miquel and Sergi
  */
 public class CityFlow_retrieveServer {
 
@@ -92,4 +94,96 @@ public class CityFlow_retrieveServer {
         }
         return postList;
     }
+    
+    public ArrayList<double[]> findCenterCicles(double[] x_bounds, double[] y_bounds, int npoints, double r){
+        int prec = 5;
+        
+        double y,ymin,x,xmin,xmax,ymax;
+        ArrayList<double[]> centers = new ArrayList<double[]>();
+        
+        //Create the centers of the circles, the bounds used is the square that surrounds the given polygon
+        ymin = min(x_bounds);
+        xmin = min(y_bounds);
+        ymax = max(x_bounds);
+        xmax = max(y_bounds);
+        y=ymin;
+        int i = 0, j = 0;
+        while(y<ymax){
+            x = xmin;
+            j = 0;
+            y = y+2*i*r;
+            if(i%2 == 0){
+                while(x<xmax){
+                    x = x+2*j*r;
+                    centers.add(new double[]{x,y});
+                    j++;
+                }
+            }else{
+                while(x<xmax){
+                    x = x+2*j*r+r;
+                    centers.add(new double[]{x,y});
+                    j++;
+                }
+            } 
+            i++;
+        }
+        // We remove all the centers that are not inside the polygon
+        
+        Iterator itr = centers.iterator();
+        ArrayList<double[]> final_centers = new ArrayList<double[]>();
+        double[] center = new double[2];
+        PolygonFloat pol = new PolygonFloat(x_bounds,y_bounds,npoints,prec);
+        while(itr.hasNext()){
+            center = (double[])itr.next();
+            if (pol.contains(center[0], center[1])){
+                final_centers.add(center);
+            }
+        }
+        return final_centers;
+    }
+    
+    public static double min(double[] array) {
+      // Validates input
+      if (array == null) {
+          throw new IllegalArgumentException("The Array must not be null");
+      } else if (array.length == 0) {
+          throw new IllegalArgumentException("Array cannot be empty.");
+      }
+  
+      // Finds and returns min
+      Double min = array[0];
+      for (int i = 1; i < array.length; i++) {
+          if (Double.isNaN(array[i])) {
+              return Double.NaN;
+          }
+          if (array[i] < min) {
+              min = array[i];
+          }
+      }
+  
+      return min;
+    }
+    
+    public static double max(double[] array) {
+      // Validates input
+      if (array == null) {
+          throw new IllegalArgumentException("The Array must not be null");
+      } else if (array.length == 0) {
+          throw new IllegalArgumentException("Array cannot be empty.");
+      }
+
+      // Finds and returns max
+      double max = array[0];
+      for (int j = 1; j < array.length; j++) {
+          if (Double.isNaN(array[j])) {
+              return Double.NaN;
+          }
+          if (array[j] > max) {
+              max = array[j];
+          }
+      }
+
+      return max;
+    }
+
 }
