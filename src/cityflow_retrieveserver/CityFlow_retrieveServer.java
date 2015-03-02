@@ -10,14 +10,12 @@ import dbConnect.Neighbourhoods;
 import dbConnect.Posts;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import org.json.*;
 import java.util.Iterator;
-import java.awt.Polygon;
 
 /**
  *
@@ -33,13 +31,14 @@ public class CityFlow_retrieveServer {
         
 		
  
-		System.out.println("Testing 1 - Search Instagram by Location");
                 
                 //Float lat = (float) 41.389639;
                 //Float lng = (float) 2.176743;
                 Float rad = (float) 500;
-                long min_timestamp = 300;
-                
+                Long min_timestamp = (long)300;
+                System.out.println("Testing 1 - Search Instagram by Location");
+                System.out.println("Starting retrieving service... rad="+rad.toString()+" time_interval="+min_timestamp.toString());
+
                 EntityManager entityManager = Persistence.createEntityManagerFactory("CityFlow_retrieveServerPU").createEntityManager();
                 
                 //Retrieve districts and neighbourhoods list from DB
@@ -50,6 +49,13 @@ public class CityFlow_retrieveServer {
                 }
                 query = entityManager.createNamedQuery("Neighbourhoods.findAll");
                 List<Neighbourhoods> neighbourhoodsList = query.getResultList();
+                for(Neighbourhoods neig : neighbourhoodsList){
+                    neig.doPoly();
+                }
+                Integer ndist= districtsList.size();
+                Integer nneig= neighbourhoodsList.size();
+		System.out.println(nneig.toString()+" neighbourhoods & "+ndist.toString()+" districts retrieved from DB...");
+
                 
                 entityManager.close();
                 
@@ -60,12 +66,14 @@ public class CityFlow_retrieveServer {
                 //Find centers of the circles to search for insta posts
                 ArrayList<double[]> centers = new ArrayList<>();
                 centers = findCenterCircles(boundslng,boundslat,rad);
+                Integer ncent = centers.size();
+                System.out.println(ncent.toString()+" cells created...");
                 
                 //Loop, search for posts every "min_timestamp" minutes
                 Integer i = 0;
                 while(true){
                     i++;
-                    
+                    System.out.println(i.toString()+"st retrieval started...");
                     entityManager = Persistence.createEntityManagerFactory("CityFlow_retrieveServerPU").createEntityManager();
                     entityManager.getTransaction().begin();
 
@@ -74,7 +82,8 @@ public class CityFlow_retrieveServer {
                     for (double[] center : centers){
                          postList.addAll(searchInstagramPostsByLocation((float)center[0],(float)center[1],rad,min_timestamp));
                     }
-                
+                    Integer npos=postList.size();
+                    
                     //Post list to DB
                     for (Posts p : postList) {
                         entityManager.persist(p);
@@ -83,9 +92,10 @@ public class CityFlow_retrieveServer {
                     }
                     entityManager.getTransaction().commit();
                     
+                    System.out.println(npos.toString()+" posts added to DB... waiting "+min_timestamp.toString()+" seconds for next retrieval...");
 
                     Thread.sleep(min_timestamp*1000);             
-                    System.out.println("\n"+i.toString());
+                    
                 }
                 
     }
@@ -109,8 +119,8 @@ public class CityFlow_retrieveServer {
 
             String type = jpost.getString("type");
                
-            Date now = new Date();
-            Posts post = new Posts(0,type,now,0);
+            Date dat = new Date(jpost.getLong("created_time")*1000);
+            Posts post = new Posts(0,type,dat,0);
                     
             String caption;
             if(jpost.isNull("caption")){

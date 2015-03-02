@@ -5,7 +5,6 @@
  */
 package cityflow_retrieveserver;
 import java.awt.Polygon;
-import java.lang.Math;
 import java.util.Arrays;
 
 /**
@@ -15,26 +14,26 @@ import java.util.Arrays;
 public class PolygonFloat extends Polygon{
     Integer precision;
 
-    public PolygonFloat(double[] x, double[] y, int npoints, int precision) {  
-        if (npoints > xpoints.length || npoints > ypoints.length) {
+    public PolygonFloat(double[] x, double[] y, int np, int precision) {  
+        if (np > x.length || np > y.length) {
             throw new IndexOutOfBoundsException("npoints > xpoints.length || "+
                                                 "npoints > ypoints.length");
         }
-        if (npoints < 0) {
+        if (np < 0) {
             throw new NegativeArraySizeException("npoints < 0");
         }
                 
-        int[] x_temp = new int[npoints];
-        int[] y_temp = new int[npoints];
+        int[] x_temp = new int[np];
+        int[] y_temp = new int[np];
 
-        for(int i=0;i<npoints;i++){
+        for(int i=0;i<np;i++){
             x_temp[i] = (int)Math.round(x[i]*Math.pow(10,precision));
             y_temp[i] = (int)Math.round(y[i]*Math.pow(10,precision));
         }
-        this.xpoints = Arrays.copyOf(x_temp, npoints);
-        this.ypoints = Arrays.copyOf(y_temp, npoints);
+        this.xpoints = Arrays.copyOf(x_temp, np);
+        this.ypoints = Arrays.copyOf(y_temp, np);
         this.precision = precision;
-        this.npoints = npoints;
+        this.npoints = np;
     }
 
     @Override

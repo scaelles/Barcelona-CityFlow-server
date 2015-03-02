@@ -109,6 +109,14 @@ public class Neighbourhoods implements Serializable {
     public void setCenter(String center) {
         this.center = center;
     }
+    
+       public PolygonFloat getPoly() {
+        return poly;
+    }
+
+    public void setPoly(PolygonFloat poly) {
+        this.poly = poly;
+    }
 
     @Override
     public int hashCode() {
@@ -133,6 +141,24 @@ public class Neighbourhoods implements Serializable {
     @Override
     public String toString() {
         return "dbConnect.Neighbourhoods[ idNeighb=" + idNeighb + " ]";
+    }
+    
+    public void doPoly() {
+        int prec = 5;
+        
+        String[] loc = this.bounds.split("[|]");
+        double[] x = new double[loc.length];
+        double[] y = new double[loc.length];
+        
+        int i =0;
+        String[] location;
+        for (String loc1 : loc) {
+            location = loc1.split(",");
+            x[i]=Double.parseDouble(location[0]);
+            y[i]=Double.parseDouble(location[1]);
+            i++;
+        }
+        setPoly(new PolygonFloat(x,y,x.length,prec));
     }
     
 }
