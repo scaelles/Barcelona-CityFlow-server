@@ -7,6 +7,8 @@ package dbConnect;
 
 import cityflow_retrieveserver.PolygonFloat;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -50,6 +52,8 @@ public class Districts implements Serializable {
     private String center;
     @Transient
     private PolygonFloat poly;
+    @Transient
+    private List<Neighbourhoods> neighbourhoods;
 
     public Districts() {
     }
@@ -104,6 +108,19 @@ public class Districts implements Serializable {
     public void setPoly(PolygonFloat poly) {
         this.poly = poly;
     }
+    
+    public List<Neighbourhoods> getNeighbourhoods() {
+        return neighbourhoods;
+    }
+
+    public void addNeighbourhoods(List<Neighbourhoods> neighs) {
+        this.neighbourhoods= new ArrayList<>();
+        for(Neighbourhoods neigh : neighs){
+            if(this.getIdDistrict()==neigh.getIdDistrict()){
+                this.neighbourhoods.add(neigh);
+            }
+        }
+    }
 
     @Override
     public int hashCode() {
@@ -148,5 +165,6 @@ public class Districts implements Serializable {
         }
         setPoly(new PolygonFloat(x,y,x.length,prec));
     }
+    
     
 }

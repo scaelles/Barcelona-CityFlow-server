@@ -42,15 +42,17 @@ public class CityFlow_retrieveServer {
                 EntityManager entityManager = Persistence.createEntityManagerFactory("CityFlow_retrieveServerPU").createEntityManager();
                 
                 //Retrieve districts and neighbourhoods list from DB
-                Query query = entityManager.createNamedQuery("Districts.findAll");
-                List<Districts> districtsList = query.getResultList();
-                for(Districts dist : districtsList){
-                    dist.doPoly();
-                }
-                query = entityManager.createNamedQuery("Neighbourhoods.findAll");
+                
+                Query query = entityManager.createNamedQuery("Neighbourhoods.findAll");
                 List<Neighbourhoods> neighbourhoodsList = query.getResultList();
                 for(Neighbourhoods neig : neighbourhoodsList){
                     neig.doPoly();
+                }
+                query = entityManager.createNamedQuery("Districts.findAll");
+                List<Districts> districtsList = query.getResultList();
+                for(Districts dist : districtsList){
+                    dist.doPoly();
+                    dist.addNeighbourhoods(neighbourhoodsList);
                 }
                 Integer ndist= districtsList.size();
                 Integer nneig= neighbourhoodsList.size();
