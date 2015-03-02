@@ -87,7 +87,7 @@ public class CityFlow_retrieveServer {
                     //Find all posts, once in each circle, repetitions are possible
                     ArrayList<Posts> postList = new ArrayList<>();
                     for (double[] center : centers){
-                         postList.addAll(searchInstagramPostsByLocation((float)center[0],(float)center[1],rad,min_timestamp));
+                         postList.addAll(searchInstagramPostsByLocation((float)center[0],(float)center[1],rad,min_timestamp,districtsList));
                     }
                     Integer npos=postList.size();
                     
@@ -107,7 +107,7 @@ public class CityFlow_retrieveServer {
                 
     }
     
-    private static ArrayList<Posts> searchInstagramPostsByLocation(Float lat,Float lng, Float rad, long min_timestamp) throws Exception  {
+    private static ArrayList<Posts> searchInstagramPostsByLocation(Float lat,Float lng, Float rad, long min_timestamp,List<Districts> districtsList) throws Exception  {
 
         String response; 
         HttpClient http = new HttpClient();
@@ -161,10 +161,11 @@ public class CityFlow_retrieveServer {
             
 
             // CALCULAR IDNEIGHBOURHOOD
-
-            //post.setIdNeighb(idNeighb);
-
-            postList.add(post);
+            int idNeighb = 0;
+            idNeighb = findNeighbourhoodId(post, districtsList);
+            post.setIdNeighb(idNeighb);
+            if (idNeighb!= 0)
+                postList.add(post);
             
         }
         return postList;
@@ -265,5 +266,19 @@ public class CityFlow_retrieveServer {
 
       return max;
     }
-
+    
+    public static int findNeighbourhoodId(Posts p, List<Districts> districtsList){
+        int idNeighb=0;
+        for(Districts dist : districtsList){
+            if (dist.getPoly().contains((double)p.getLat(),(double)p.getLong1())){
+                for(Neighbourhoods neighb: dist.getNeighbourhoods()){
+                    if (neighb.getPoly().contains((double)p.getLat(),(double)p.getLong1())){
+                        return neighb.getIdNeighb();
+                    }
+                }
+				return idNeighb;
+            }            
+        }
+        return idNeighb;
+    }
 }
