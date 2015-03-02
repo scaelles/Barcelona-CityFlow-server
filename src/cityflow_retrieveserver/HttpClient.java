@@ -35,7 +35,7 @@ public class HttpClient {
                         .concat("&distance=").concat(rad.toString())
                         .concat("&min_timestamp=").concat(timestamp.toString())
                         .concat("&client_id=f270041f78bc441f9998a741db100261"); //Instagram developer ID
-                System.out.println(url);
+                //System.out.println(url);
  
 		URL obj = new URL(url);
 		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();

@@ -68,12 +68,17 @@ public class CityFlow_retrieveServer {
                 centers = findCenterCircles(boundslng,boundslat,rad);
                 Integer ncent = centers.size();
                 System.out.println(ncent.toString()+" cells created...");
+//                for (double[] center : centers){
+//                    Double x = center[0];
+//                    Double y = center[1];
+//                    System.out.println(x.toString()+","+y.toString());
+//                }
                 
                 //Loop, search for posts every "min_timestamp" minutes
                 Integer i = 0;
                 while(true){
                     i++;
-                    System.out.println(i.toString()+"st retrieval started...");
+                    System.out.println(i.toString()+" retrieval started...");
                     entityManager = Persistence.createEntityManagerFactory("CityFlow_retrieveServerPU").createEntityManager();
                     entityManager.getTransaction().begin();
 
@@ -171,6 +176,7 @@ public class CityFlow_retrieveServer {
         
         double rx=r*0.005/557;
         double ry=r*0.01/834;
+        double a=0.86602540378*ry;
         
         double y,ymin,x,xmin,xmax,ymax;
         ArrayList<double[]> centers = new ArrayList<>();
@@ -187,17 +193,17 @@ public class CityFlow_retrieveServer {
             if(i%2 == 0){
                 while(x<xmax){
                     centers.add(new double[]{x,y});
-					x = x+2*rx;
+                    x = x+3*rx;
                 }
             }else{
-				x = x+rx;
+		x = x+1.5*rx;
                 while(x<xmax){
                     centers.add(new double[]{x,y});
-					x = x+2*rx;
+                    x = x+3*rx;
                 }
             } 
-			y = y+2*ry;
-            i++;
+        y = y+a;
+        i++;
         }
         // We remove all the centers that are not inside the polygon
         
