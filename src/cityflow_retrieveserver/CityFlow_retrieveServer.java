@@ -78,6 +78,7 @@ public class CityFlow_retrieveServer {
                 
                 //Loop, search for posts every "min_timestamp" minutes
                 Integer i = 0;
+                Long waitTime;
                 while(true){
                     i++;
                     System.out.println(i.toString()+" retrieval started...");
@@ -85,6 +86,7 @@ public class CityFlow_retrieveServer {
                     entityManager.getTransaction().begin();
 
                     //Find all posts, once in each circle, repetitions are possible
+                    Date d1 = new Date();
                     ArrayList<Posts> postList = new ArrayList<>();
                     for (double[] center : centers){
                          postList.addAll(searchInstagramPostsByLocation((float)center[0],(float)center[1],rad,min_timestamp,districtsList));
@@ -97,11 +99,14 @@ public class CityFlow_retrieveServer {
                         //entityManager.flush();
                         //entityManager.refresh(p);
                     }
-                    entityManager.getTransaction().commit();
+                    try{
+                        entityManager.getTransaction().commit();
+                    }catch(Exception e){};
+                    Date d2 = new Date();
+                    waitTime = min_timestamp-(d2.getTime()-d1.getTime())/1000;
+                    System.out.println(npos.toString()+" posts added to DB... waiting "+waitTime.toString()+" seconds for next retrieval...");
                     
-                    System.out.println(npos.toString()+" posts added to DB... waiting "+min_timestamp.toString()+" seconds for next retrieval...");
-
-                    Thread.sleep(min_timestamp*1000);             
+                    Thread.sleep(waitTime*1000);             
                     
                 }
                 
