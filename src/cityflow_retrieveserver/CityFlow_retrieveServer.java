@@ -132,13 +132,13 @@ public class CityFlow_retrieveServer {
                     Date d2 = new Date();
                     waitTime = min_timestamp-(d2.getTime()-d1.getTime())/1000;
                     System.out.println(clearList.size()+" posts added to DB... waiting "+waitTime.toString()+" seconds for next retrieval...");
-                    System.out.println("..................................");
+                    //System.out.println("..................................");
                     
                     for(int j=0;j<waitTime/10;j++){
                         Thread.sleep(10*1000); 
                         System.out.print(".");
                     }
-                    
+                    System.out.println("");
                 }                
     }
     
