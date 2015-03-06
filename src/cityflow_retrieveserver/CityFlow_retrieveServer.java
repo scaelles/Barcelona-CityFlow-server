@@ -10,12 +10,19 @@ import dbConnect.Neighbourhoods;
 import dbConnect.Posts;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import org.json.*;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  *
@@ -75,7 +82,7 @@ public class CityFlow_retrieveServer {
 //                    Double y = center[1];
 //                    System.out.println(x.toString()+","+y.toString());
 //                }
-                
+                System.out.println("..................................");
                 //Loop, search for posts every "min_timestamp" minutes
                 Integer i = 0;
                 Long waitTime;
@@ -91,25 +98,48 @@ public class CityFlow_retrieveServer {
                     for (double[] center : centers){
                          postList.addAll(searchInstagramPostsByLocation((float)center[0],(float)center[1],rad,min_timestamp,districtsList));
                     }
-                    Integer npos=postList.size();
                     
-                    //Post list to DB
-                    for (Posts p : postList) {
+                    
+                    System.out.println(postList.size()+" posts before duplications check...");
+                    
+                    //Delete duplications in list
+//                    for (Posts p : postList) {
+//                        System.out.println(p.getCaption());
+//                    }
+                    
+                    ArrayList<Posts> clearList = new ArrayList<>();
+                    Map<String, Posts> mapPosts = new HashMap<String, Posts>(postList.size());
+                    for(Posts p : postList) {
+                        mapPosts.put(p.getImLink(), p);
+                    }
+                    
+                    for(Entry<String, Posts> p : mapPosts.entrySet()) {
+                        clearList.add(p.getValue());
+                    }
+                    
+//                    for (Posts p : clearList) {
+//                        System.out.println(p.getCaption());
+//                    }
+                  
+                    System.out.println(clearList.size()+" posts after duplications check...");
+                    
+                    for (Posts p : clearList) {
                         entityManager.persist(p);
-                        //entityManager.flush();
-                        //entityManager.refresh(p);
                     }
                     try{
                         entityManager.getTransaction().commit();
                     }catch(Exception e){};
                     Date d2 = new Date();
                     waitTime = min_timestamp-(d2.getTime()-d1.getTime())/1000;
-                    System.out.println(npos.toString()+" posts added to DB... waiting "+waitTime.toString()+" seconds for next retrieval...");
+                    System.out.println(clearList.size()+" posts added to DB... waiting "+waitTime.toString()+" seconds for next retrieval...");
+                    //System.out.println("..................................");
                     
-                    Thread.sleep(waitTime*1000);             
-                    
-                }
-                
+                    for(int j=0;j<waitTime/10;j++){
+                        Thread.sleep(10*1000); 
+                        System.out.print(".");
+                    }
+                    System.out.println("");
+                }                
     }
     
     private static ArrayList<Posts> searchInstagramPostsByLocation(Float lat,Float lng, Float rad, long min_timestamp,List<Districts> districtsList) throws Exception  {
