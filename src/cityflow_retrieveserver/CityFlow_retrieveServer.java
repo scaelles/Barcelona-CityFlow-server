@@ -86,8 +86,9 @@ public class CityFlow_retrieveServer {
                 //Loop, search for posts every "min_timestamp" minutes
                 Integer i = 0;
                 Long waitTime;
-                try{
+                
                 while(true){
+                try{
                     i++;
                     System.out.println(i.toString()+" retrieval started...");
                     
@@ -142,8 +143,8 @@ public class CityFlow_retrieveServer {
                         System.out.print(".");
                     }
                     System.out.println("");
+                }catch(Exception e){System.out.println(e);};
                 }
-                }catch(Exception e){};
     }
     
     private static ArrayList<Posts> searchInstagramPostsByLocation(Float lat,Float lng, Float rad, long min_timestamp,List<Districts> districtsList) throws Exception  {
