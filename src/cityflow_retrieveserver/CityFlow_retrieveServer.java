@@ -86,12 +86,11 @@ public class CityFlow_retrieveServer {
                 //Loop, search for posts every "min_timestamp" minutes
                 Integer i = 0;
                 Long waitTime;
+                try{
                 while(true){
                     i++;
                     System.out.println(i.toString()+" retrieval started...");
-                    entityManager = Persistence.createEntityManagerFactory("CityFlow_retrieveServerPU").createEntityManager();
-                    entityManager.getTransaction().begin();
-
+                    
                     //Find all posts, once in each circle, repetitions are possible
                     Date d1 = new Date();
                     ArrayList<Posts> postList = new ArrayList<>();
@@ -120,15 +119,19 @@ public class CityFlow_retrieveServer {
 //                    for (Posts p : clearList) {
 //                        System.out.println(p.getCaption());
 //                    }
-                  
+                    
                     System.out.println(clearList.size()+" posts after duplications check...");
                     
+                    
+                    entityManager = Persistence.createEntityManagerFactory("CityFlow_retrieveServerPU").createEntityManager();
+                    entityManager.getTransaction().begin();
+
                     for (Posts p : clearList) {
                         entityManager.persist(p);
                     }
-                    try{
-                        entityManager.getTransaction().commit();
-                    }catch(Exception e){};
+                    
+                    entityManager.getTransaction().commit();
+                    entityManager.close();
                     Date d2 = new Date();
                     waitTime = min_timestamp-(d2.getTime()-d1.getTime())/1000;
                     System.out.println(clearList.size()+" posts added to DB... waiting "+waitTime.toString()+" seconds for next retrieval...");
@@ -139,7 +142,8 @@ public class CityFlow_retrieveServer {
                         System.out.print(".");
                     }
                     System.out.println("");
-                }                
+                }
+                }catch(Exception e){};
     }
     
     private static ArrayList<Posts> searchInstagramPostsByLocation(Float lat,Float lng, Float rad, long min_timestamp,List<Districts> districtsList) throws Exception  {
